@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/IplSuperstoreApp.Server/" />
+  <Folder Name="/IplSuperstoreApp.Server/Tests/">
+    <Project Path="IplSuperstoreApp.Server/Tests/IplSuperstoreApp.Server.Tests.csproj" />
+  </Folder>
   <Project Path="iplsuperstoreapp.client/iplsuperstoreapp.client.esproj">
     <Build />
     <Deploy />
