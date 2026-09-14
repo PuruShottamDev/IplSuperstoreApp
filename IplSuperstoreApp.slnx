@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="iplsuperstoreapp.client/iplsuperstoreapp.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="IplSuperstoreApp.Server/IplSuperstoreApp.Server.csproj" />
+</Solution>
