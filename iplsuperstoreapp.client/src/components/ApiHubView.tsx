@@ -23,6 +23,7 @@ interface ApiHubViewProps {
   showToast: (msg: string) => void;
 }
 
+
 export const ApiHubView: React.FC<ApiHubViewProps> = ({
   setCurrentRoute,
   apiEndpoint,
@@ -32,7 +33,7 @@ export const ApiHubView: React.FC<ApiHubViewProps> = ({
   showToast,
 }) => {
   const [activeTab, setActiveTab] = useState<'swagger' | 'architecture' | 'controller'>('swagger');
-  const [selectedRoute, setSelectedRoute] = useState<string>('GET /api/v1/merchandise/catalog');
+  const [selectedRoute, setSelectedRoute] = useState<string>('GET /api/products');
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [isPinging, setIsPinging] = useState<boolean>(false);
 
@@ -54,46 +55,36 @@ export const ApiHubView: React.FC<ApiHubViewProps> = ({
   };
 
   const swaggerRoutes = [
-    { method: 'GET', path: '/api/v1/merchandise/catalog', desc: 'Fetch verified T20 products with franchise tag filters', status: '200 OK' },
-    { method: 'GET', path: '/api/v1/merchandise/{sku}', desc: 'Retrieve single product with NFC holographic signature', status: '200 OK' },
-    { method: 'POST', path: '/api/v1/checkout/orders', desc: 'Atomic order placement & BlueDart shipment generation', status: '201 Created' },
-    { method: 'POST', path: '/api/v1/discounts/validate', desc: 'Fan loyalty code calculation engine (e.g. DHONI7)', status: '200 OK' },
-    { method: 'GET', path: '/api/v1/telemetry/health', desc: 'Service health check, Redis ping, DB connection metrics', status: '200 OK' }
+    { method: 'GET', path: '/api/products', desc: 'Fetch products with search, franchise, category, and paging filters', status: '200 OK' },
+    { method: 'GET', path: '/api/products/{id}', desc: 'Retrieve a single product for the detail view', status: '200 OK' },
+    { method: 'GET', path: '/api/cart', desc: 'Load the authenticated customer cart', status: '200 OK' },
+    { method: 'GET', path: '/api/orders', desc: 'Load the authenticated customer orders', status: '200 OK' },
+    { method: 'POST', path: '/api/auth/login', desc: 'Authenticate the customer and return an access token', status: '200 OK' }
   ];
 
-  const csharpCodeSnippet = `// IPLFanZone.Api/Controllers/MerchandiseController.cs
+  const csharpCodeSnippet = `// IPLFanZone.Api/Controllers/ProductsController.cs
 namespace IPLFanZone.Api.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/products")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-public class MerchandiseController : ControllerBase
+public class ProductsController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly IMemoryCache _cache;
-    private readonly ILogger<MerchandiseController> _logger;
+    private readonly ILogger<ProductsController> _logger;
 
-    public MerchandiseController(IMediator mediator, IMemoryCache cache, ILogger<MerchandiseController> logger)
+    public ProductsController(IMediator mediator, ILogger<ProductsController> logger)
     {
         _mediator = mediator;
-        _cache = cache;
         _logger = logger;
     }
 
-    [HttpGet("catalog")]
+    [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<ProductDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetCatalog([FromQuery] string? franchise, [FromQuery] string? category, CancellationToken ct)
+    public async Task<IActionResult> GetProducts([FromQuery] string? franchise, [FromQuery] string? category, CancellationToken ct)
     {
-        var cacheKey = $"catalog_{franchise}_{category}";
-        if (_cache.TryGetValue(cacheKey, out IReadOnlyList<ProductDto>? cached))
-        {
-            return Ok(cached);
-        }
-
         var query = new GetProductsQuery(franchise, category);
         var result = await _mediator.Send(query, ct);
-        
-        _cache.Set(cacheKey, result, TimeSpan.FromMinutes(10));
         return Ok(result);
     }
 }`;

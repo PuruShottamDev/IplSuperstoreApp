@@ -7,10 +7,11 @@ import {
   SlidersHorizontal 
 } from 'lucide-react';
 import type { Product, ProductCategory, AppRoute } from '../types';
-import { FRANCHISES, PRODUCTS_DATA } from '../data/products';
+import { FRANCHISES } from '../data/products';
 import { ProductCard } from './ProductCard';
 
 interface CatalogViewProps {
+  products: Product[];
   onSelectProduct: (product: Product) => void;
   onQuickView: (product: Product) => void;
   onAddToCart: (product: Product, size: string, e: React.MouseEvent) => void;
@@ -20,6 +21,7 @@ interface CatalogViewProps {
 }
 
 export const CatalogView: React.FC<CatalogViewProps> = ({
+  products,
   onSelectProduct,
   onQuickView,
   onAddToCart,
@@ -40,7 +42,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
   ];
 
   const filteredProducts = useMemo(() => {
-    let list = PRODUCTS_DATA.filter(p => {
+    let list = products.filter(p => {
       const matchFranchise = selectedFranchise === 'ALL' || p.franchise === selectedFranchise;
       const matchCategory = activeCategory === 'All Categories' || p.category === activeCategory;
       const matchSearch =
@@ -59,7 +61,7 @@ export const CatalogView: React.FC<CatalogViewProps> = ({
     }
 
     return list;
-  }, [selectedFranchise, activeCategory, searchQuery, sortBy]);
+  }, [products, selectedFranchise, activeCategory, searchQuery, sortBy]);
 
   return (
     <main className="ipl-main-content">

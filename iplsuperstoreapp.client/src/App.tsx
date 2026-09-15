@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import type { AppRoute, Product, CartItem, Order } from './types';
 import { PRODUCTS_DATA } from './data/products';
@@ -15,16 +15,34 @@ import { OrdersView } from './components/OrdersView';
 import { ApiHubView } from './components/ApiHubView';
 import { QuickViewModal } from './components/QuickViewModal';
 import { Footer } from './components/Footer';
+import { api } from './api';
 
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState<AppRoute>('catalog');
   const [selectedProduct, setSelectedProduct] = useState<Product>(PRODUCTS_DATA[0]);
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>(PRODUCTS_DATA);
   const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [apiEndpoint, setApiEndpoint] = useState<string>('https://localhost:7042/api/v1');
   const [apiLatency, setApiLatency] = useState<number | string>(24);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    api.getProducts({ pageSize: 100 })
+      .then(({ products }) => {
+        if (isMounted && products.length > 0) setCatalogProducts(products);
+      })
+      .catch(() => {
+        // Keep the bundled catalog available when the API is offline.
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Initial 3 items in Bag to match screenshot
   const [cart, setCart] = useState<CartItem[]>([
@@ -195,6 +213,7 @@ export default function App() {
       {/* Main Routed View */}
       {currentRoute === 'catalog' && (
         <CatalogView
+          products={catalogProducts}
           onSelectProduct={onSelectProduct}
           onQuickView={(p) => setQuickViewProduct(p)}
           onAddToCart={handleAddToCart}
